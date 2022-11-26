@@ -1,24 +1,42 @@
-import { useRef,useState } from 'react';
+import { useRef, useState } from 'react';
 
 import Card from '../ui/Card';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import classes from './QuoteForm.module.css';
 import { db } from '../utils/firebase';
+import { ref, set, get, update, remove, child } from "firebase/database"
+
 const QuoteForm = (props) => {
+  const [obj, setObj] = {
+    db: db,
+    author: "",
+    thequote: "",
+  }
+  const getAllInputs = () => {
+    return {
+
+      author: obj.author,
+      thequote:obj.thequote
+    }
+
+  }
+  const insertdata = () =>{
+    const db = obj.db
+    const data = getAllInputs()
+
+    set(ref(db, "author/"+data.author))
+  }
+  const addData = (event) => {
+    const id = event.target.id
+    if (id == "btnAdd") {
+      insertdata()
+    }
+  }
+
+
+
   const authorInputRef = useRef();
   const textInputRef = useRef();
-  const [doneState, setDone] = useState(false);
-  const [todos, setTodos] = useState({});
-  const onCheck = (isChecked) => {
-    setDone(isChecked);
-  };
-  useEffect(() => {
-    return onValue(ref(db, '/todos'), querySnapShot => {
-      let data = querySnapShot.val() || {};
-      let todoItems = {...data};
-      setTodos(todoItems);
-    });
-  }, []);
   function submitFormHandler(event) {
     event.preventDefault();
 
@@ -41,14 +59,14 @@ const QuoteForm = (props) => {
 
         <div className={classes.control}>
           <label htmlFor='author'>Author</label>
-          <input type='text' id='author' ref={authorInputRef} />
+          <input onChange={e => { setObj({ author: e.target.value }) }} type='text' id='author' ref={authorInputRef} />
         </div>
         <div className={classes.control}>
           <label htmlFor='text'>Text</label>
           <textarea id='text' rows='5' ref={textInputRef}></textarea>
         </div>
         <div className={classes.actions}>
-          <button className='btn'>Add Quote</button>
+          <button className='btn' id='btnAdd' onClick={addData}>Add Quote</button>
         </div>
       </form>
     </Card>
